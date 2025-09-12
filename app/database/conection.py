@@ -2,7 +2,6 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from contextlib import contextmanager
 from os import getenv
-from typing import Generator
 
 # Función pura que devuelve la configuración de la conexión
 def get_db_config() -> dict:
@@ -18,6 +17,7 @@ def get_db_config() -> dict:
 @contextmanager
 def get_connection():
     config = get_db_config()
+    print("Database connection config:", config)  # Temporary print for debugging
     conn = psycopg2.connect(**config, cursor_factory=RealDictCursor)
     try:
         yield conn
