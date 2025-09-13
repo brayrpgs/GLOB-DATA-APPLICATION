@@ -1,68 +1,63 @@
-from fastapi import APIRouter
-from typing import List
-from app.schemas.issue import IssueSchema, IssueCreateSchema
-from app.controllers.issue_controller import create_issue, get_issues, patch_issue, put_issue, delete_issue
+from typing import Optional
+from fastapi import APIRouter, Query, HTTPException
+from asyncpg import Pool
+from app.controllers.issue_controller import get_issues_controller
+from app.schemas.issue import IssueResponse
+from app.database.conection import get_pool
 
-router = APIRouter(prefix="/issues", tags=["Issues"])
+router = APIRouter(
+    prefix="/issues",
+    tags=["issues"]
+)
 
-@router.post("/", response_model=IssueSchema)
-def post_issue(issue: IssueCreateSchema):
-    return create_issue(issue)
-
-@router.get("/", response_model=List[IssueSchema])
-def list_issues(
-    issue_id: int = None,
-    summary: str = None,
-    description: str = None,
-    audit_id: int = None,
-    resolve_at: str = None,
-    due_date: str = None,
-    votes: int = None,
-    original_estimation: int = None,
-    custom_start_date: str = None,
-    story_point_estimate: int = None,
-    parent_summary: int = None,
-    issue_type: int = None,
-    project_id_fk: int = None,
-    user_assigned_fk: int = None,
-    user_creator_issue_fk: int = None,
-    user_informator_fk: int = None,
-    sprint_id_fk: int = None,
-    status_issue: int = None,
-    page: int = 1,
-    limit: int = 10
+@router.get("/", response_model=IssueResponse)
+async def get_issues(
+    issue_id: int = Query(None),
+    summary: str = Query(None),
+    description: str = Query(None),
+    audit_id: int = Query(None),
+    resolve_at: str = Query(None),
+    due_date: str = Query(None),
+    votes: int = Query(None),
+    original_estimation: int = Query(None),
+    custom_start_date: str = Query(None),
+    story_point_estimate: int = Query(None),
+    parent_summary: int = Query(None),
+    issue_type: int = Query(None),
+    project_id_fk: int = Query(None),
+    user_assigned_fk: int = Query(None),
+    user_creator_issue_fk: int = Query(None),
+    user_informator_fk: int = Query(None),
+    sprint_id_fk: int = Query(None),
+    status_issue: int = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1)
 ):
-    return get_issues(
-        issue_id,
-        summary,
-        description,
-        audit_id,
-        resolve_at,
-        due_date,
-        votes,
-        original_estimation,
-        custom_start_date,
-        story_point_estimate,
-        parent_summary,
-        issue_type,
-        project_id_fk,
-        user_assigned_fk,
-        user_creator_issue_fk,
-        user_informator_fk,
-        sprint_id_fk,
-        status_issue,
-        page,
-        limit
+    try:
+        pool: Pool = get_pool()  # obtiene el pool desde connection.py
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return await get_issues_controller(
+        db_pool=pool,
+        issue_id=issue_id,
+        summary=summary,
+        description=description,
+        audit_id=audit_id,
+        resolve_at=resolve_at,
+        due_date=due_date,
+        votes=votes,
+        original_estimation=original_estimation,
+        custom_start_date=custom_start_date,
+        story_point_estimate=story_point_estimate,
+        parent_summary=parent_summary,
+        issue_type=issue_type,
+        project_id_fk=project_id_fk,
+        user_assigned_fk=user_assigned_fk,
+        user_creator_issue_fk=user_creator_issue_fk,
+        user_informator_fk=user_informator_fk,
+        sprint_id_fk=sprint_id_fk,
+        status_issue=status_issue,
+        page=page,
+        limit=limit
     )
-
-@router.patch("/{issue_id}", response_model=IssueSchema)
-def patch_issue_route(issue_id: int, issue: IssueCreateSchema):
-    return patch_issue(issue_id, issue)
-
-@router.put("/{issue_id}", response_model=IssueSchema)
-def put_issue_route(issue_id: int, issue: IssueCreateSchema):
-    return put_issue(issue_id, issue)
-
-@router.delete("/{issue_id}", response_model=IssueSchema)
-def delete_issue_route(issue_id: int):
-    return delete_issue(issue_id)
