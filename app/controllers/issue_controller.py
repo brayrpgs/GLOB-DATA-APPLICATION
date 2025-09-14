@@ -68,7 +68,8 @@ async def get_issues_controller(
         )
         
         # Retornar respuesta estructurada
-        return IssueResponse(data=issues_data)
+        return IssueResponse(data=issues_data,page=page,currentLimit=limit,totalData=len(issues_data))
+    
         
     except HTTPException:
         # Re-lanzar HTTPExceptions sin modificar
@@ -82,4 +83,25 @@ async def get_issues_controller(
             detail=f"Error interno del servidor: {str(e)}"
         )
 
-
+async def delete_issue_controller(db_pool: Optional[Pool], issue_id: int) -> dict:
+    if db_pool is None:
+        logger.error("DB pool no inicializado")
+        raise HTTPException(status_code=500, detail="DB pool no inicializado")
+    
+    try:
+        issue_repository = IssueRepository(db_pool)
+        deleted_issue = await issue_repository.delete_issue(issue_id)
+        
+        if not deleted_issue:
+            raise HTTPException(status_code=404, detail="Issue no encontrado")
+        
+        return {"data": deleted_issue}
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Error inesperado en delete_issue_controller")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error interno del servidor: {str(e)}"
+        )

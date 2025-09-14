@@ -1,3 +1,4 @@
+from numbers import Number
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from app.models.issue import Issue
@@ -38,6 +39,9 @@ class IssueResponse(BaseModel):
     El SP devuelve un JSON array que se parsea directamente.
     """
     data: List[Dict[str, Any]]  # JSON raw del SP
+    page: int
+    currentLimit: int
+    totalData: int
     
     # Método para convertir a lista de Issues validados
     def get_validated_issues(self) -> List[Issue]:

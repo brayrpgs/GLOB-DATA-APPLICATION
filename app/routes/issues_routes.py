@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, Query, HTTPException
 from asyncpg import Pool
-from app.controllers.issue_controller import get_issues_controller
+from app.controllers.issue_controller import get_issues_controller,delete_issue_controller
 from app.schemas.issue import IssueResponse
 from app.database.conection import get_pool
 
@@ -61,3 +61,12 @@ async def get_issues(
         page=page,
         limit=limit
     )
+
+@router.delete("/{issue_id}")
+async def delete_issue(issue_id: int):
+    try:
+        pool: Pool = get_pool()
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return await delete_issue_controller(db_pool=pool, issue_id=issue_id)
