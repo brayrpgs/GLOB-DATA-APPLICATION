@@ -13,6 +13,15 @@ class IssueRepository:
     def __init__(self, db_pool: Pool):
         self.db_pool = db_pool
 
+    async def post_issue(self, params: tuple) -> Dict[str, Any]:
+        query = f'CALL PUBLIC."POST_ISSUE"({",".join([f"${i+1}" for i in range(len(params))])})'
+        async with self.db_pool.acquire() as conn:
+            row = await conn.fetchrow(query, *params)
+            if not row:
+                return {}
+            result_data = row.get('data') if 'data' in row else row[0]
+            return json.loads(result_data) if isinstance(result_data, str) else result_data
+
     async def get_issues(
         self,
         issue_id: Optional[int] = None,
@@ -199,7 +208,6 @@ class IssueRepository:
         except json.JSONDecodeError as je:
             logger.error("Error al parsear JSON: %s", je)
             raise Exception(f"Error al procesar datos del SP: {str(je)}")
-
 
     async def delete_issue(self, issue_id: int) -> Dict[str, Any]:
         """

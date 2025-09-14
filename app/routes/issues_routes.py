@@ -1,14 +1,54 @@
 from typing import Optional
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException,Depends
 from asyncpg import Pool
-from app.controllers.issue_controller import get_issues_controller,delete_issue_controller
-from app.schemas.issue import IssueResponse
+from app.controllers.issue_controller import get_issues_controller,delete_issue_controller,post_issue_controller
+from app.schemas.issue import IssueResponse,IssueCreate
 from app.database.conection import get_pool
 
 router = APIRouter(
     prefix="/issues",
     tags=["issues"]
 )
+
+@router.post("/")
+async def create_issue(
+    summary: str = Query(...),
+    description: str = Query(...),
+    resolve_at: Optional[str] = Query(None),
+    due_date: Optional[str] = Query(None),
+    votes: Optional[int] = Query(None),
+    original_estimation: Optional[int] = Query(None),
+    custom_start_date: Optional[str] = Query(None),
+    story_point_estimate: Optional[int] = Query(None),
+    parent_summary: Optional[int] = Query(None),
+    issue_type: Optional[int] = Query(None),
+    project_id: Optional[int] = Query(None),
+    user_assigned: Optional[int] = Query(None),
+    user_creator: Optional[int] = Query(None),
+    user_informator: Optional[int] = Query(None),
+    sprint_id: Optional[int] = Query(None),
+    status: Optional[int] = Query(None),
+):
+    pool: Pool = get_pool()
+    issue_data = {
+        "summary": summary,
+        "description": description,
+        "resolve_at": resolve_at,
+        "due_date": due_date,
+        "votes": votes,
+        "original_estimation": original_estimation,
+        "custom_start_date": custom_start_date,
+        "story_point_estimate": story_point_estimate,
+        "parent_summary": parent_summary,
+        "issue_type": issue_type,
+        "project_id": project_id,
+        "user_assigned": user_assigned,
+        "user_creator": user_creator,
+        "user_informator": user_informator,
+        "sprint_id": sprint_id,
+        "status": status,
+    }
+    return await post_issue_controller(pool, issue_data)
 
 @router.get("/", response_model=IssueResponse)
 async def get_issues(

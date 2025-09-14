@@ -3,6 +3,7 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from app.models.issue import Issue
 import logging
+from datetime import date
 
 # Configurar logger para el schema
 logger = logging.getLogger(__name__)
@@ -25,7 +26,9 @@ class IssueSchema(BaseModel):
     user_assigned_fk: Optional[int] = Field(None, alias="USER_ASSIGNED_FK")
     user_creator_issue_fk: Optional[int] = Field(None, alias="USER_CREATOR_ISSUE_FK")
     # Corregido para que coincida con el JSON del SP
-    user_informator_issue_fk: Optional[int] = Field(None, alias="USER_INFORMATOR_ISSUE_FK")
+    user_informator_issue_fk: Optional[int] = Field(
+        None, alias="USER_INFORMATOR_ISSUE_FK"
+    )
     sprint_id_fk: Optional[int] = Field(None, alias="SPRINT_ID_FK")
     status_issue: Optional[int] = Field(None, alias="STATUS_ISSUE")
 
@@ -38,11 +41,12 @@ class IssueResponse(BaseModel):
     Respuesta que contiene la lista de issues.
     El SP devuelve un JSON array que se parsea directamente.
     """
+
     data: List[Dict[str, Any]]  # JSON raw del SP
     page: int
     currentLimit: int
     totalData: int
-    
+
     # Método para convertir a lista de Issues validados
     def get_validated_issues(self) -> List[Issue]:
         """Convierte los datos raw a objetos Issue validados"""
@@ -51,15 +55,18 @@ class IssueResponse(BaseModel):
             try:
                 # Convertir fechas de string a date si es necesario
                 issue_data = item.copy()
-                date_fields = ['RESOLVE_AT', 'DUE_DATE', 'CUSTOM_START_DATE']
+                date_fields = ["RESOLVE_AT", "DUE_DATE", "CUSTOM_START_DATE"]
                 for field in date_fields:
                     if field in issue_data and isinstance(issue_data[field], str):
                         try:
                             from datetime import datetime
-                            issue_data[field] = datetime.strptime(issue_data[field], '%Y-%m-%d').date()
+
+                            issue_data[field] = datetime.strptime(
+                                issue_data[field], "%Y-%m-%d"
+                            ).date()
                         except:
                             issue_data[field] = None
-                
+
                 validated_issues.append(Issue(**issue_data))
             except Exception as e:
                 logger.warning("Error al validar issue: %s, data: %s", e, item)
@@ -71,8 +78,9 @@ class IssueResponseValidated(BaseModel):
     """
     Versión que valida directamente como Issues (más estricta)
     """
+
     data: List[Issue]
-    
+
     @classmethod
     def from_raw_response(cls, raw_data: List[Dict[str, Any]]):
         """Crear desde datos raw del SP"""
@@ -84,3 +92,23 @@ class IssueResponseValidated(BaseModel):
                 logger.warning("Error al validar issue: %s", e)
                 continue
         return cls(data=validated_issues)
+
+
+class IssueCreate(BaseModel):
+    summary: Optional[str] = None
+    description: Optional[str] = None
+    audit_id: Optional[int] = None
+    resolve_at: Optional[str] = None
+    due_date: Optional[str] = None
+    votes: Optional[int] = None
+    original_estimation: Optional[int] = None
+    custom_start_date: Optional[str] = None
+    story_point_estimate: Optional[int] = None
+    parent_summary: Optional[int] = None
+    issue_type: Optional[int] = None
+    project_id_fk: Optional[int] = None
+    user_assigned_fk: Optional[int] = None
+    user_creator_issue_fk: Optional[int] = None
+    user_informator_fk: Optional[int] = None
+    sprint_id_fk: Optional[int] = None
+    status_issue: Optional[int] = None
