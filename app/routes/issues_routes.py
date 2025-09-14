@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Optional
 from fastapi import APIRouter, Query, HTTPException,Depends
 from asyncpg import Pool
@@ -14,20 +15,20 @@ router = APIRouter(
 async def create_issue(
     summary: str = Query(...),
     description: str = Query(...),
-    resolve_at: Optional[str] = Query(None),
-    due_date: Optional[str] = Query(None),
-    votes: Optional[int] = Query(None),
-    original_estimation: Optional[int] = Query(None),
-    custom_start_date: Optional[str] = Query(None),
-    story_point_estimate: Optional[int] = Query(None),
+    resolve_at: date = Query(...),
+    due_date: date = Query(...),
+    votes: int = Query(...),
+    original_estimation: int = Query(...),
+    custom_start_date: date = Query(...),
+    story_point_estimate: int = Query(...),
     parent_summary: Optional[int] = Query(None),
-    issue_type: Optional[int] = Query(None),
-    project_id: Optional[int] = Query(None),
-    user_assigned: Optional[int] = Query(None),
-    user_creator: Optional[int] = Query(None),
-    user_informator: Optional[int] = Query(None),
-    sprint_id: Optional[int] = Query(None),
-    status: Optional[int] = Query(None),
+    issue_type: int = Query(...),
+    project_id: int = Query(...),
+    user_assigned: int = Query(...),
+    user_creator: int = Query(...),
+    user_informator: int = Query(...),
+    sprint_id: int = Query(...),
+    status: int = Query(...),
 ):
     pool: Pool = get_pool()
     issue_data = {
