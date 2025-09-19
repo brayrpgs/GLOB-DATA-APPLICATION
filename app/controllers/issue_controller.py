@@ -102,7 +102,7 @@ async def get_issues_controller(
 
         # Return structured response
         return IssueResponse(
-            data=issues_data, page=page, currentLimit=limit, totalData=len(issues_data)
+            Issues=issues_data, page=page, currentLimit=limit, totalData=len(issues_data)
         )
 
     except HTTPException:

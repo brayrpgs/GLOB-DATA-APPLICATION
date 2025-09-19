@@ -42,7 +42,7 @@ class IssueResponse(BaseModel):
     The SP returns a JSON array that is parsed directly.
     """
 
-    data: List[Dict[str, Any]]  # Raw JSON from the SP
+    Issues: List[Dict[str, Any]]  # Raw JSON from the SP
     page: int
     currentLimit: int
     totalData: int
@@ -51,7 +51,7 @@ class IssueResponse(BaseModel):
     def get_validated_issues(self) -> List[Issue]:
         """Converts raw data to validated Issue objects"""
         validated_issues = []
-        for item in self.data:
+        for item in self.Issues:
             try:
                 # Convert dates from string to date if necessary
                 issue_data = item.copy()
