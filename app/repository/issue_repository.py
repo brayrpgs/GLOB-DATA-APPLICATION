@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class IssueRepository:
-    """Repository para manejar la lógica de acceso a datos de Issues"""
+    """Repository to handle data access logic for Issues"""
 
     def __init__(self, db_pool: Pool):
         self.db_pool = db_pool
@@ -46,17 +46,17 @@ class IssueRepository:
         limit: int = 10,
     ) -> List[Dict[str, Any]]:
         """
-        Ejecuta el stored procedure GET_ISSUE y retorna los datos parseados.
+        Executes the GET_ISSUE stored procedure and returns the parsed data.
 
         Returns:
-            List[Dict[str, Any]]: Lista de issues obtenidas del SP
+            List[Dict[str, Any]]: List of issues obtained from the SP
 
         Raises:
-            Exception: Si hay errores en la ejecución del SP o parsing de datos
+            Exception: If there are errors in the execution of the SP or data parsing
         """
-        logger.debug("Ejecutando get_issues en repository")
+        logger.debug("Executing get_issues in repository")
 
-        # Preparar parámetros para el SP (21 parámetros total)
+        # Prepare parameters for the SP (21 parameters total)
         params = self._prepare_sp_parameters(
             issue_id,
             summary,
@@ -80,29 +80,29 @@ class IssueRepository:
             limit,
         )
 
-        logger.debug("Parámetros preparados para SP: %s", params)
+        logger.debug("Parameters prepared for SP: %s", params)
 
         try:
             async with self.db_pool.acquire() as conn:
-                # Ejecutar stored procedure
+                # Execute stored procedure
                 row = await self._execute_stored_procedure(conn, params)
 
-                # Procesar resultado
+                # Process result
                 return self._process_sp_result(row)
 
         except Exception as e:
-            logger.exception("Error al ejecutar get_issues en repository: %s", str(e))
+            logger.exception("Error executing get_issues in repository: %s", str(e))
             raise
 
     def _prepare_sp_parameters(self, *args) -> tuple:
         """
-        Prepara los parámetros para el stored procedure GET_ISSUE.
+        Prepares the parameters for the GET_ISSUE stored procedure.
 
         Args:
-            *args: Todos los parámetros del método get_issues
+            *args: All the parameters of the get_issues method
 
         Returns:
-            tuple: Tupla con los 21 parámetros para el SP
+            tuple: Tuple with the 21 parameters for the SP
         """
         (
             issue_id,
@@ -128,7 +128,7 @@ class IssueRepository:
         ) = args
 
         return (
-            None,  # OUT data (se inicializa en null::json)
+            None,  # OUT data (initialized as null::json)
             issue_id,  # P_ISSUE_ID
             summary,  # P_SUMMARY
             description,  # P_DESCRIPTION
@@ -153,47 +153,47 @@ class IssueRepository:
 
     async def _execute_stored_procedure(self, conn, params: tuple):
         """
-        Ejecuta el stored procedure GET_ISSUE.
+        Executes the GET_ISSUE stored procedure.
 
         Args:
-            conn: Conexión a la base de datos
-            params: Parámetros para el SP
+            conn: Connection to the database
+            params: Parameters for the SP
 
         Returns:
-            Row result del SP
+            Row result from the SP
         """
         placeholders = ",".join(f"${i + 1}" for i in range(len(params)))
         query = f'CALL PUBLIC."GET_ISSUE"({placeholders})'
-        logger.debug("Query a ejecutar: %s", query)
+        logger.debug("Query to execute: %s", query)
 
         row = await conn.fetchrow(query, *params)
-        logger.debug("Resultado del SP: %s", row)
+        logger.debug("Result from the SP: %s", row)
 
         return row
 
     def _process_sp_result(self, row) -> List[Dict[str, Any]]:
         """
-        Procesa el resultado del stored procedure.
+        Processes the result of the stored procedure.
 
         Args:
-            row: Fila resultado del SP
+            row: Result row from the SP
 
         Returns:
-            List[Dict[str, Any]]: Lista de issues procesadas
+            List[Dict[str, Any]]: List of processed issues
         """
         if not row:
-            logger.warning("El SP no devolvió ningún resultado")
+            logger.warning("The SP returned no result")
             return []
 
-        # Extraer el parámetro OUT 'data'
+        # Extract the OUT 'data' parameter
         result_data = row.get("data") if "data" in row else row[0]
         logger.debug("OUT parameter 'data': %s", result_data)
 
         if result_data is None:
-            logger.warning("El parámetro 'data' está vacío")
+            logger.warning("The 'data' parameter is empty")
             return []
 
-        # Parsear JSON
+        # Parse JSON
         try:
             issues_data = (
                 json.loads(result_data) if isinstance(result_data, str) else result_data
@@ -202,20 +202,20 @@ class IssueRepository:
             if not isinstance(issues_data, list):
                 issues_data = [issues_data] if issues_data else []
 
-            logger.debug("Issues parseados: %d registros", len(issues_data))
+            logger.debug("Parsed issues: %d records", len(issues_data))
             return issues_data
 
         except json.JSONDecodeError as je:
-            logger.error("Error al parsear JSON: %s", je)
-            raise Exception(f"Error al procesar datos del SP: {str(je)}")
+            logger.error("Error parsing JSON: %s", je)
+            raise Exception(f"Error processing SP data: {str(je)}")
         
     async def patch_issue(self, params: tuple) -> Dict[str, Any]:
         """
-        Ejecuta el stored procedure PATCH_ISSUE y devuelve el issue actualizado.
+        Executes the PATCH_ISSUE stored procedure and returns the updated issue.
         """
-        # IMPORTANTE: el primer parámetro OUT DATA se pasa como NULL
+        # IMPORTANT: the first OUT DATA parameter is passed as NULL
         query = f'CALL PUBLIC."PATCH_ISSUE"(NULL, {",".join([f"${i+1}" for i in range(len(params))])})'
-        logger.debug("Ejecutando patch_issue con query: %s", query)
+        logger.debug("Executing patch_issue with query: %s", query)
 
         try:
             async with self.db_pool.acquire() as conn:
@@ -227,24 +227,24 @@ class IssueRepository:
                 return json.loads(result_data) if isinstance(result_data, str) else result_data
 
         except Exception as e:
-            logger.exception("Error en patch_issue: %s", e)
+            logger.exception("Error in patch_issue: %s", e)
             raise
 
     async def delete_issue(self, issue_id: int) -> Dict[str, Any]:
         """
-        Ejecuta el stored procedure DELETE_ISSUE y devuelve el issue eliminado.
+        Executes the DELETE_ISSUE stored procedure and returns the deleted issue.
         """
-        logger.debug("Ejecutando delete_issue en repository con issue_id=%s", issue_id)
+        logger.debug("Executing delete_issue in repository with issue_id=%s", issue_id)
         params = (issue_id, None)
 
         try:
             async with self.db_pool.acquire() as conn:
                 placeholders = ",".join(f"${i + 1}" for i in range(len(params)))
                 query = f'CALL PUBLIC."DELETE_ISSUE"({placeholders})'
-                logger.debug("Query a ejecutar: %s", query)
+                logger.debug("Query to execute: %s", query)
 
                 row = await conn.fetchrow(query, *params)
-                logger.debug("Resultado del SP DELETE_ISSUE: %s", row)
+                logger.debug("Result of the DELETE_ISSUE SP: %s", row)
 
                 if not row:
                     return {}
@@ -256,16 +256,16 @@ class IssueRepository:
                     else result_data
                 )
         except Exception as e:
-            logger.exception("Error en delete_issue: %s", e)
+            logger.exception("Error in delete_issue: %s", e)
             raise
         
     async def put_issue(self, params: tuple) -> Dict[str, Any]:
         """
-        Ejecuta el stored procedure PUT_ISSUE y devuelve el issue actualizado.
+        Executes the PUT_ISSUE stored procedure and returns the updated issue.
         """
-        # OUT DATA se pasa como NULL al inicio
+        # OUT DATA is passed as NULL at the beginning
         query = f'CALL PUBLIC."PUT_ISSUE"({",".join(["$"+str(i+1) for i in range(len(params))])}, NULL)'
-        logger.debug("Ejecutando put_issue con query: %s", query)
+        logger.debug("Executing put_issue with query: %s", query)
 
         try:
             async with self.db_pool.acquire() as conn:
@@ -277,5 +277,5 @@ class IssueRepository:
                 return json.loads(result_data) if isinstance(result_data, str) else result_data
 
         except Exception as e:
-            logger.exception("Error en put_issue: %s", e)
+            logger.exception("Error in put_issue: %s", e)
             raise

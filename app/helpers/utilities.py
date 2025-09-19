@@ -9,7 +9,7 @@ def parse_date(value: Optional[str]) -> Optional[date]:
         #parsing the date
         return datetime.strptime(value, "%Y-%m-%d").date()
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Formato de fecha inválido: {value}")
+        raise HTTPException(status_code=400, detail=f"Invalid date format: {value}")
     
 def parse_int(value: Optional[str]) -> Optional[int]:
     if value is None:
@@ -19,28 +19,28 @@ def parse_int(value: Optional[str]) -> Optional[int]:
     except ValueError:
         raise HTTPException(
             status_code=400,
-            detail=f"Formato de número entero inválido: {value}"
+            detail=f"Invalid integer format: {value}"
         )
     
 def _validate_pagination_parameters(page: int, limit: int) -> None:
     """
-    Valida los parámetros de paginación.
+    Validates pagination parameters.
     
     Args:
-        page: Número de página
-        limit: Límite de resultados por página
+        page: Page number
+        limit: Results limit per page
         
     Raises:
-        HTTPException: Si los parámetros no son válidos
+        HTTPException: If the parameters are not valid
     """
     if page < 1:
         raise HTTPException(
             status_code=401, 
-            detail="El parámetro 'page' debe ser mayor a 0"
+            detail="The 'page' parameter must be greater than 0"
         )
     
-    if limit < 1 or limit > 100:  # Límite máximo configurable
+    if limit < 1 or limit > 100:  # Configurable maximum limit
         raise HTTPException(
             status_code=402, 
-            detail="El parámetro 'limit' debe estar entre 1 y 100"
+            detail="The 'limit' parameter must be between 1 and 100"
         )

@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 async def post_issue_controller(db_pool: Optional[Pool], issue_data: dict) -> dict:
     if db_pool is None:
-        raise HTTPException(status_code=500, detail="DB pool no inicializado")
+        raise HTTPException(status_code=500, detail="DB pool not initialized")
 
     try:
         repo = IssueRepository(db_pool)
@@ -39,7 +39,7 @@ async def post_issue_controller(db_pool: Optional[Pool], issue_data: dict) -> di
         new_issue = await repo.post_issue(params)
         return {"data": new_issue}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 async def get_issues_controller(
     db_pool: Optional[Pool],
@@ -64,19 +64,19 @@ async def get_issues_controller(
     page: int = 1,
     limit: int = 10,
 ) -> IssueResponse:
-    # Validar pool de conexiones
+    # Validate connection pool
     if db_pool is None:
-        logger.error("DB pool no inicializado")
-        raise HTTPException(status_code=500, detail="DB pool no inicializado")
+        logger.error("DB pool not initialized")
+        raise HTTPException(status_code=500, detail="DB pool not initialized")
 
-    # Validaciones de negocio
+    # Business validations
     _validate_pagination_parameters(page, limit)
 
     try:
-        # Crear repository e inyectar dependencias
+        # Create repository and inject dependencies
         issue_repository = IssueRepository(db_pool)
 
-        # Obtener datos del repository
+        # Get data from the repository
         issues_data = await issue_repository.get_issues(
             issue_id=issue_id,
             summary=summary,
@@ -100,29 +100,29 @@ async def get_issues_controller(
             limit=limit,
         )
 
-        # Retornar respuesta estructurada
+        # Return structured response
         return IssueResponse(
             data=issues_data, page=page, currentLimit=limit, totalData=len(issues_data)
         )
 
     except HTTPException:
-        # Re-lanzar HTTPExceptions sin modificar
+        # Re-throw HTTPExceptions without modification
         raise
 
     except Exception as e:
-        # Capturar errores inesperados y convertir a HTTPException
-        logger.exception("Error inesperado en get_issues_controller")
+        # Capture unexpected errors and convert to HTTPException
+        logger.exception("Unexpected error in get_issues_controller")
         raise HTTPException(
-            status_code=500, detail=f"Error interno del servidor: {str(e)}"
+            status_code=500, detail=f"Internal server error: {str(e)}"
         )
 
 async def patch_issue_controller(db_pool: Optional[Pool], issue_data: IssuePatchRequest) -> dict:
     if db_pool is None:
-        raise HTTPException(status_code=500, detail="DB pool no disponible")
+        raise HTTPException(status_code=500, detail="DB pool not available")
 
     repo = IssueRepository(db_pool)
 
-    # Tupla de parámetros en el mismo orden que el SP (sin el OUT)
+    # Tuple of parameters in the same order as the SP (without the OUT)
     params = (
         issue_data.issue_id,
         issue_data.summary,
@@ -147,16 +147,16 @@ async def patch_issue_controller(db_pool: Optional[Pool], issue_data: IssuePatch
     try:
         return await repo.patch_issue(params)
     except Exception as e:
-        logger.exception("Error en patch_issue_controller: %s", e)
-        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+        logger.exception("Error in patch_issue_controller: %s", e)
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 async def put_issue_controller(db_pool: Pool, issue_data: IssuePutRequest) -> dict:
         if db_pool is None:
-            raise HTTPException(status_code=500, detail="DB pool no disponible")
+            raise HTTPException(status_code=500, detail="DB pool not available")
 
         repo = IssueRepository(db_pool)
 
-        # Tupla de parámetros en el mismo orden que el SP (sin el OUT)
+        # Tuple of parameters in the same order as the SP (without the OUT)
         params = (
             issue_data.issue_id,
             issue_data.summary,
@@ -181,26 +181,26 @@ async def put_issue_controller(db_pool: Pool, issue_data: IssuePutRequest) -> di
         try:
             return await repo.put_issue(params)
         except Exception as e:
-            logger.exception("Error en put_issue_controller: %s", e)
-            raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+            logger.exception("Error in put_issue_controller: %s", e)
+            raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 async def delete_issue_controller(db_pool: Optional[Pool], issue_id: int) -> dict:
     if db_pool is None:
-        logger.error("DB pool no inicializado")
-        raise HTTPException(status_code=500, detail="DB pool no inicializado")
+        logger.error("DB pool not initialized")
+        raise HTTPException(status_code=500, detail="DB pool not initialized")
 
     try:
         issue_repository = IssueRepository(db_pool)
         deleted_issue = await issue_repository.delete_issue(issue_id)
 
         if not deleted_issue:
-            raise HTTPException(status_code=404, detail="Issue no encontrado")
+            raise HTTPException(status_code=404, detail="Issue not found")
 
         return {"data": deleted_issue}
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception("Error inesperado en delete_issue_controller")
+        logger.exception("Unexpected error in delete_issue_controller")
         raise HTTPException(
-            status_code=500, detail=f"Error interno del servidor: {str(e)}"
+            status_code=500, detail=f"Internal server error: {str(e)}"
         )

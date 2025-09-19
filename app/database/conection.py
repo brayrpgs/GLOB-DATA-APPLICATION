@@ -4,7 +4,7 @@ import asyncpg
 _pool: asyncpg.Pool | None = None
 
 def get_db_config() -> dict:
-    """Devuelve la configuración de la conexión a la DB desde variables de entorno."""
+    """Returns the DB connection configuration from environment variables."""
     return {
         "host": getenv("POSTGRES_HOST"),
         "port": 5432,
@@ -14,7 +14,7 @@ def get_db_config() -> dict:
     }
 
 async def init_pool() -> asyncpg.Pool:
-    """Inicializa el pool de conexiones si aún no existe."""
+    """Initializes the connection pool if it does not already exist."""
     global _pool
     if _pool is None:
         config = get_db_config()
@@ -22,13 +22,13 @@ async def init_pool() -> asyncpg.Pool:
     return _pool
 
 def get_pool() -> asyncpg.Pool:
-    """Devuelve el pool de conexiones. Lanza error si no se inicializó."""
+    """Returns the connection pool. Throws an error if it has not been initialized."""
     if _pool is None:
         raise RuntimeError("Connection pool is not initialized. Call init_pool() first.")
     return _pool
 
 async def close_pool():
-    """Cierra el pool de conexiones si existe."""
+    """Closes the connection pool if it exists."""
     global _pool
     if _pool is not None:
         await _pool.close()

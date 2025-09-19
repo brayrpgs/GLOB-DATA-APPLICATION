@@ -16,7 +16,7 @@ class Sprint(BaseModel):
         allow_population_by_field_name = True
 
 class SprintResponse(BaseModel):
-    data: List[Dict[str, Any]]  # JSON raw del SP
+    data: List[Dict[str, Any]]  # Raw JSON from the SP
     page: Optional[int]
     currentLimit: Optional[int]
 
@@ -29,14 +29,14 @@ class SprintResponse(BaseModel):
                         item[field] = datetime.strptime(item[field], "%Y-%m-%d").date()
                 validated.append(Sprint(**item))
             except Exception as e:
-                logger.warning("Error al validar sprint: %s, data: %s", e, item)
+                logger.warning("Error validating sprint: %s, data: %s", e, item)
         return validated
 
 class SprintCreate(BaseModel):
-    name: str = Field(..., description="Nombre del sprint")
-    description: str = Field(..., description="Descripción del sprint")
-    date_init: date = Field(..., description="Fecha de inicio del sprint")
-    date_end: date = Field(..., description="Fecha de fin del sprint")
+    name: str = Field(..., description="Name of the sprint")
+    description: str = Field(..., description="Description of the sprint")
+    date_init: date = Field(..., description="Start date of the sprint")
+    date_end: date = Field(..., description="End date of the sprint")
 
 class SprintPatchRequest(BaseModel):
     sprint_id: int

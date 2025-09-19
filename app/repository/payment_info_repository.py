@@ -47,7 +47,7 @@ class PaymentInfoRepository:
                 if not row:
                     return []
 
-                # Extraer OUT parameter DATA JSON
+                # Extract OUT parameter DATA JSON
                 data_json = row.get("data")
                 data_list = json.loads(data_json) if isinstance(data_json, str) else data_json
                 

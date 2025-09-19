@@ -29,7 +29,7 @@ class IssueTypeRepository:
         priority: Optional[int] = None,
         page: int = 1,
         limit: int = 10
-    ) -> Dict[str, Any]:  # <- retorna dict con data, page, etc.
+    ) -> Dict[str, Any]:  # <- returns dict with data, page, etc.
         query = 'CALL PUBLIC."GET_ISSUE_TYPE"(NULL, $1, $2, $3, $4, $5)'
         try:
             async with self.db_pool.acquire() as conn:
@@ -37,7 +37,7 @@ class IssueTypeRepository:
                 if not row:
                     return {}
 
-                # Extraer OUT parameter DATA JSON
+                # Extract OUT parameter DATA JSON
                 data_json = row.get("data")
                 data_list = json.loads(data_json) if isinstance(data_json, str) else data_json
 

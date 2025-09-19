@@ -5,7 +5,7 @@ from app.models.issue import Issue
 import logging
 from datetime import date
 
-# Configurar logger para el schema
+# Configure logger for the schema
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +25,7 @@ class IssueSchema(BaseModel):
     project_id_fk: Optional[int] = Field(None, alias="PROJECT_ID_FK")
     user_assigned_fk: Optional[int] = Field(None, alias="USER_ASSIGNED_FK")
     user_creator_issue_fk: Optional[int] = Field(None, alias="USER_CREATOR_ISSUE_FK")
-    # Corregido para que coincida con el JSON del SP
+    # Corrected to match the JSON from the SP
     user_informator_issue_fk: Optional[int] = Field(
         None, alias="USER_INFORMATOR_ISSUE_FK"
     )
@@ -38,22 +38,22 @@ class IssueSchema(BaseModel):
 
 class IssueResponse(BaseModel):
     """
-    Respuesta que contiene la lista de issues.
-    El SP devuelve un JSON array que se parsea directamente.
+    Response containing the list of issues.
+    The SP returns a JSON array that is parsed directly.
     """
 
-    data: List[Dict[str, Any]]  # JSON raw del SP
+    data: List[Dict[str, Any]]  # Raw JSON from the SP
     page: int
     currentLimit: int
     totalData: int
 
-    # Método para convertir a lista de Issues validados
+    # Method to convert to a list of validated Issues
     def get_validated_issues(self) -> List[Issue]:
-        """Convierte los datos raw a objetos Issue validados"""
+        """Converts raw data to validated Issue objects"""
         validated_issues = []
         for item in self.data:
             try:
-                # Convertir fechas de string a date si es necesario
+                # Convert dates from string to date if necessary
                 issue_data = item.copy()
                 date_fields = ["RESOLVE_AT", "DUE_DATE", "CUSTOM_START_DATE"]
                 for field in date_fields:
@@ -69,27 +69,27 @@ class IssueResponse(BaseModel):
 
                 validated_issues.append(Issue(**issue_data))
             except Exception as e:
-                logger.warning("Error al validar issue: %s, data: %s", e, item)
+                logger.warning("Error validating issue: %s, data: %s", e, item)
                 continue
         return validated_issues
 
 
 class IssueResponseValidated(BaseModel):
     """
-    Versión que valida directamente como Issues (más estricta)
+    Version that validates directly as Issues (stricter)
     """
 
     data: List[Issue]
 
     @classmethod
     def from_raw_response(cls, raw_data: List[Dict[str, Any]]):
-        """Crear desde datos raw del SP"""
+        """Create from raw SP data"""
         validated_issues = []
         for item in raw_data:
             try:
                 validated_issues.append(Issue(**item))
             except Exception as e:
-                logger.warning("Error al validar issue: %s", e)
+                logger.warning("Error validating issue: %s", e)
                 continue
         return cls(data=validated_issues)
 

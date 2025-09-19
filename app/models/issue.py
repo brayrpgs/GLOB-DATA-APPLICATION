@@ -31,11 +31,11 @@ class Issue(BaseModel):
             try:
                 return datetime.strptime(v, '%Y-%m-%d').date()
             except ValueError:
-                # Si no se puede parsear, devolver None o lanzar error
+                # If it cannot be parsed, return None or raise an error
                 return None
         return v
 
     class Config:
         allow_population_by_field_name = True
-        # Permitir usar alias para la población
+        # Allow using aliases for population
         populate_by_name = True

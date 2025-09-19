@@ -75,7 +75,7 @@ async def get_issues(
     limit: int = Query(10, ge=1)
 ):
     try:
-        pool: Pool = get_pool()  # obtiene el pool desde connection.py
+        pool: Pool = get_pool()  # get the pool from connection.py
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -106,14 +106,14 @@ async def get_issues(
 @router.patch("/issues")
 async def patch_issue(issue: IssuePatchRequest, db_pool: Pool = Depends(get_pool)):
     """
-    Actualiza un issue parcialmente usando PATCH_ISSUE SP.
+    Partially updates an issue using PATCH_ISSUE SP.
     """
     return await patch_issue_controller(db_pool, issue)
 
 @router.put("/issues")
 async def put_issue(issue: IssuePutRequest, db_pool: Pool = Depends(get_pool)):
     """
-    Reemplaza completamente un issue usando PUT_ISSUE SP.
+    Completely replaces an issue using PUT_ISSUE SP.
     """
     return await put_issue_controller(db_pool, issue)
 
