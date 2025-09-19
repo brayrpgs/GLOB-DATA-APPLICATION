@@ -19,7 +19,6 @@ class Issue(BaseModel):
     PROJECT_ID_FK: Optional[int] = Field(None, alias="PROJECT_ID_FK")
     USER_ASSIGNED_FK: Optional[int] = Field(None, alias="USER_ASSIGNED_FK")
     USER_CREATOR_ISSUE_FK: Optional[int] = Field(None, alias="USER_CREATOR_ISSUE_FK")
-    # Corregido el nombre del campo para que coincida con el JSON del SP
     USER_INFORMATOR_ISSUE_FK: Optional[int] = Field(None, alias="USER_INFORMATOR_ISSUE_FK")
     SPRINT_ID_FK: Optional[int] = Field(None, alias="SPRINT_ID_FK")
     STATUS_ISSUE: Optional[int] = Field(None, alias="STATUS_ISSUE")

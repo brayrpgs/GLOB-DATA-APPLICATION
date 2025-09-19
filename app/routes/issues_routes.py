@@ -2,8 +2,8 @@ from datetime import date
 from typing import Optional
 from fastapi import APIRouter, Query, HTTPException,Depends
 from asyncpg import Pool
-from app.controllers.issue_controller import get_issues_controller,delete_issue_controller,post_issue_controller
-from app.schemas.issue import IssueResponse,IssueCreate
+from app.controllers.issue_controller import get_issues_controller,delete_issue_controller,post_issue_controller,patch_issue_controller,put_issue_controller
+from app.schemas.issue import IssueResponse,IssuePatchRequest,IssuePutRequest
 from app.database.conection import get_pool
 
 router = APIRouter(
@@ -102,6 +102,20 @@ async def get_issues(
         page=page,
         limit=limit
     )
+    
+@router.patch("/issues")
+async def patch_issue(issue: IssuePatchRequest, db_pool: Pool = Depends(get_pool)):
+    """
+    Actualiza un issue parcialmente usando PATCH_ISSUE SP.
+    """
+    return await patch_issue_controller(db_pool, issue)
+
+@router.put("/issues")
+async def put_issue(issue: IssuePutRequest, db_pool: Pool = Depends(get_pool)):
+    """
+    Reemplaza completamente un issue usando PUT_ISSUE SP.
+    """
+    return await put_issue_controller(db_pool, issue)
 
 @router.delete("/{issue_id}")
 async def delete_issue(issue_id: int):

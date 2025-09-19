@@ -112,3 +112,44 @@ class IssueCreate(BaseModel):
     user_informator_fk: Optional[int] = None
     sprint_id_fk: Optional[int] = None
     status_issue: Optional[int] = None
+
+class IssuePatchRequest(BaseModel):
+    issue_id: int
+    summary: Optional[str] = None
+    description: Optional[str] = None
+    audit_id: Optional[int] = None
+    resolve_at: Optional[date] = None
+    due_date: Optional[date] = None
+    votes: Optional[int] = None
+    original_estimation: Optional[int] = None
+    custom_start_date: Optional[date] = None
+    story_point_estimate: Optional[int] = None
+    parent_summary: Optional[int] = None
+    issue_type: Optional[int] = None
+    project_id: Optional[int] = None
+    user_assigned: Optional[int] = None
+    user_creator: Optional[int] = None
+    user_informator: Optional[int] = None
+    sprint_id: Optional[int] = None
+    status: Optional[int] = None
+    
+    
+class IssuePutRequest(BaseModel):
+    issue_id: int
+    summary: str
+    description: str
+    audit_id: int
+    resolve_at: date
+    due_date: date
+    votes: int
+    original_estimation: int
+    custom_start_date: date
+    story_point_estimate: int
+    parent_summary: int
+    issue_type: int
+    project_id: int
+    user_assigned: int
+    user_creator: int
+    user_informator: int
+    sprint_id: int
+    status: int

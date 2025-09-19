@@ -208,6 +208,27 @@ class IssueRepository:
         except json.JSONDecodeError as je:
             logger.error("Error al parsear JSON: %s", je)
             raise Exception(f"Error al procesar datos del SP: {str(je)}")
+        
+    async def patch_issue(self, params: tuple) -> Dict[str, Any]:
+        """
+        Ejecuta el stored procedure PATCH_ISSUE y devuelve el issue actualizado.
+        """
+        # IMPORTANTE: el primer parámetro OUT DATA se pasa como NULL
+        query = f'CALL PUBLIC."PATCH_ISSUE"(NULL, {",".join([f"${i+1}" for i in range(len(params))])})'
+        logger.debug("Ejecutando patch_issue con query: %s", query)
+
+        try:
+            async with self.db_pool.acquire() as conn:
+                row = await conn.fetchrow(query, *params)
+                if not row:
+                    return {}
+
+                result_data = row.get("data") if "data" in row else row[0]
+                return json.loads(result_data) if isinstance(result_data, str) else result_data
+
+        except Exception as e:
+            logger.exception("Error en patch_issue: %s", e)
+            raise
 
     async def delete_issue(self, issue_id: int) -> Dict[str, Any]:
         """
@@ -236,4 +257,25 @@ class IssueRepository:
                 )
         except Exception as e:
             logger.exception("Error en delete_issue: %s", e)
+            raise
+        
+    async def put_issue(self, params: tuple) -> Dict[str, Any]:
+        """
+        Ejecuta el stored procedure PUT_ISSUE y devuelve el issue actualizado.
+        """
+        # OUT DATA se pasa como NULL al inicio
+        query = f'CALL PUBLIC."PUT_ISSUE"({",".join(["$"+str(i+1) for i in range(len(params))])}, NULL)'
+        logger.debug("Ejecutando put_issue con query: %s", query)
+
+        try:
+            async with self.db_pool.acquire() as conn:
+                row = await conn.fetchrow(query, *params)
+                if not row:
+                    return {}
+
+                result_data = row.get("data") if "data" in row else row[0]
+                return json.loads(result_data) if isinstance(result_data, str) else result_data
+
+        except Exception as e:
+            logger.exception("Error en put_issue: %s", e)
             raise
