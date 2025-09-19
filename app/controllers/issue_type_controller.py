@@ -29,7 +29,7 @@ async def get_issue_type_controller(
     repo = IssueTypeRepository(db_pool)
     try:
         data = await repo.get_issue_type(issue_type_id, status, priority, page, limit)
-        return {"data": data, "page": page, "currentLimit": limit, "totalData": len(data)}
+        return {"Issue_type": data, "page": page, "currentLimit": limit, "totalData": len(data)}
     except Exception as e:
         logger.exception("Error en get_issue_type_controller: %s", e)
         raise HTTPException(status_code=500, detail=str(e))

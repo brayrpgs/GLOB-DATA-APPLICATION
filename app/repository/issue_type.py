@@ -41,7 +41,7 @@ class IssueTypeRepository:
                 data_json = row.get("data")
                 data_list = json.loads(data_json) if isinstance(data_json, str) else data_json
 
-                return {"data": data_list}
+                return data_list
         except Exception as e:
             logger.exception("Error en get_issue_type: %s", e)
             raise
