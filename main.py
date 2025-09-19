@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
     await init_pool()
     yield
 
-app = FastAPI(title="API de Issues", lifespan=lifespan)
+app = FastAPI(title="GLOB-DATA-APPLICATION", lifespan=lifespan)
 
 # Mount routers
 app.include_router(issue_router)
