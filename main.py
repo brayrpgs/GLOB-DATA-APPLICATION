@@ -5,10 +5,7 @@ from app.routes.issue_type import router as issue_type
 from app.routes.sprint_routes import router as sprint
 from app.routes.project_routes import router as proyect
 from app.routes.user_project_routes import router as proyect_routes
-from app.routes.membership_plan_routes import router as membership
-from app.routes.payment_info_routes import router as payment
-from app.routes.recover_password_routes import router as recovery_password
-from app.routes.account_routes import router as account 
+
 
 from app.database.conection import init_pool, close_pool
 
@@ -26,7 +23,3 @@ app.include_router(issue_type)
 app.include_router(sprint)
 app.include_router(proyect)
 app.include_router(proyect_routes)
-app.include_router(membership)
-app.include_router(payment)
-app.include_router(recovery_password)
-app.include_router(account)
