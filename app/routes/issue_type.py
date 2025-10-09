@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, HTTPException
+from fastapi.responses import JSONResponse
+import logging
 from asyncpg import Pool
 from app.controllers.issue_type_controller import (
     post_issue_type_controller,
@@ -15,7 +17,24 @@ router = APIRouter(
     tags=["issue-types"]
 )
 
-@router.post("/")
+@router.post("/", responses={
+    201: {
+        "description": "Created",
+        "content": {
+            "application/json": {
+                "example": {"success": True, "data": {"id": 1, "status": 1, "priority": 2}}
+            }
+        }
+    },
+    400: {
+        "description": "Bad Request",
+        "content": {"application/json": {"example": {"detail": "status and priority are required fields"}}}
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {"application/json": {"example": {"detail": "Internal Server Error"}}}
+    }
+})
 async def create_issue_type(
     issue_type: IssueTypeCreate,
     db_pool: Pool = Depends(get_pool)
@@ -23,10 +42,33 @@ async def create_issue_type(
     """Create an issue type by accepting a JSON body matching IssueTypeCreate schema."""
     # Validate required fields
     if issue_type.status is None or issue_type.priority is None:
-        from fastapi import HTTPException
         raise HTTPException(status_code=400, detail="status and priority are required fields")
     # Extract fields from the body and forward to the controller
-    return await post_issue_type_controller(db_pool, issue_type.status, issue_type.priority)
+    try:
+        result = await post_issue_type_controller(db_pool, issue_type.status, issue_type.priority)
+        # Controller should raise HTTPException on errors; otherwise map result to status codes below
+
+        # Determine status code from result if present
+        status_code = None
+        if isinstance(result, dict):
+            if isinstance(result.get("status_code"), int):
+                status_code = result.pop("status_code")
+            elif isinstance(result.get("code"), int):
+                status_code = result.pop("code")
+            elif result.get("success") is False or str(result.get("status")).lower() in ("error", "fail"):
+                status_code = 400
+
+        # Default to 201 Created for successful POST
+        if status_code is None:
+            status_code = 201
+
+        return JSONResponse(status_code=status_code, content=result)
+    except HTTPException:
+        # re-raise so FastAPI returns the provided status and detail
+        raise
+    except Exception as e:
+        logging.exception("Unexpected error in create_issue_type: %s", e)
+        return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
 @router.get("/")
 async def get_issue_types(
