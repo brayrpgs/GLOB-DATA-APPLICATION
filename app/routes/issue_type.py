@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, Depends, HTTPException
+from fastapi import APIRouter, Query, Depends, HTTPException, Path
 from fastapi.responses import JSONResponse
 import logging
 from asyncpg import Pool
@@ -90,14 +90,55 @@ async def patch_issue_type(
 ):
     return await patch_issue_type_controller(db_pool, issue_type_id, status, priority)
 
-@router.put("/")
+@router.put("/{issue_type_id}", responses={
+    200: {
+        "description": "Updated",
+        "content": {"application/json": {"example": {"success": True, "data": {"id": 1, "status": 1, "priority": 2}}}}
+    },
+    400: {
+        "description": "Bad Request",
+        "content": {"application/json": {"example": {"detail": "status and priority are required fields"}}}
+    },
+    404: {"description": "Not Found", "content": {"application/json": {"example": {"detail": "Issue type not found"}}}},
+    500: {"description": "Internal Server Error", "content": {"application/json": {"example": {"detail": "Internal Server Error"}}}}
+})
 async def put_issue_type(
-    issue_type_id: int = Query(...),
-    status: int = Query(...),
-    priority: int = Query(...),
+    issue_type: IssueTypeCreate,
+    issue_type_id: int = Path(..., description="ID of the issue type to update"),
     db_pool: Pool = Depends(get_pool)
 ):
-    return await put_issue_type_controller(db_pool, issue_type_id, status, priority)
+    """Fully replace an issue type identified by path parameter `issue_type_id` using a JSON body.
+
+    The body must include `status` and `priority` fields. Returns the updated resource on success.
+    """
+    # Validate required fields in body
+    if issue_type.status is None or issue_type.priority is None:
+        raise HTTPException(status_code=400, detail="status and priority are required fields")
+
+    try:
+        result = await put_issue_type_controller(db_pool, issue_type_id, issue_type.status, issue_type.priority)
+        # If controller returns None (not found), respond 404
+        if result is None:
+            return JSONResponse(status_code=404, content={"detail": "Issue type not found"})
+        # Map controller result to proper status code if provided
+        status_code = None
+        if isinstance(result, dict):
+            if isinstance(result.get("status_code"), int):
+                status_code = result.pop("status_code")
+            elif isinstance(result.get("code"), int):
+                status_code = result.pop("code")
+            elif result.get("success") is False or str(result.get("status")).lower() in ("error", "fail"):
+                status_code = 400
+
+        if status_code is None:
+            status_code = 200
+
+        return JSONResponse(status_code=status_code, content=result)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.exception("Unexpected error in put_issue_type: %s", e)
+        return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
 @router.delete("/{issue_type_id}")
 async def delete_issue_type(issue_type_id: int, db_pool: Pool = Depends(get_pool)):
