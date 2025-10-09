@@ -8,6 +8,7 @@ from app.controllers.issue_type_controller import (
     delete_issue_type_controller
 )
 from app.database.conection import get_pool
+from app.schemas.issue_type import IssueTypeCreate
 
 router = APIRouter(
     prefix="/issue-types",
@@ -16,11 +17,16 @@ router = APIRouter(
 
 @router.post("/")
 async def create_issue_type(
-    status: int = Query(...),
-    priority: int = Query(...),
+    issue_type: IssueTypeCreate,
     db_pool: Pool = Depends(get_pool)
 ):
-    return await post_issue_type_controller(db_pool, status, priority)
+    """Create an issue type by accepting a JSON body matching IssueTypeCreate schema."""
+    # Validate required fields
+    if issue_type.status is None or issue_type.priority is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="status and priority are required fields")
+    # Extract fields from the body and forward to the controller
+    return await post_issue_type_controller(db_pool, issue_type.status, issue_type.priority)
 
 @router.get("/")
 async def get_issue_types(
