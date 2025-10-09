@@ -185,6 +185,33 @@ async def put_issue_type(
         logging.exception("Unexpected error in put_issue_type: %s", e)
         return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
-@router.delete("/{issue_type_id}")
+@router.delete("/{issue_type_id}", responses={
+    200: {"description": "Deleted", "content": {"application/json": {"example": {"success": True}}}},
+    404: {"description": "Not Found", "content": {"application/json": {"example": {"detail": "Issue type not found"}}}},
+    500: {"description": "Internal Server Error", "content": {"application/json": {"example": {"detail": "Internal Server Error"}}}}
+})
 async def delete_issue_type(issue_type_id: int, db_pool: Pool = Depends(get_pool)):
-    return await delete_issue_type_controller(db_pool, issue_type_id)
+    try:
+        result = await delete_issue_type_controller(db_pool, issue_type_id)
+        if result is None:
+            return JSONResponse(status_code=404, content={"detail": "Issue type not found"})
+
+        # Map controller result to proper status code if provided
+        status_code = None
+        if isinstance(result, dict):
+            if isinstance(result.get("status_code"), int):
+                status_code = result.pop("status_code")
+            elif isinstance(result.get("code"), int):
+                status_code = result.pop("code")
+            elif result.get("success") is False or str(result.get("status")).lower() in ("error", "fail"):
+                status_code = 400
+
+        if status_code is None:
+            status_code = 200
+
+        return JSONResponse(status_code=status_code, content=result)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.exception("Unexpected error in delete_issue_type: %s", e)
+        return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
