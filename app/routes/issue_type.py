@@ -88,7 +88,7 @@ async def get_issue_types(
     },
     400: {
         "description": "Bad Request",
-        "content": {"application/json": {"example": {"detail": "Provide exactly one of status or priority"}}}
+        "content": {"application/json": {"example": {"detail": "Provide at least one of status or priority"}}}
     },
     404: {"description": "Not Found", "content": {"application/json": {"example": {"detail": "Issue type not found"}}}},
     500: {"description": "Internal Server Error", "content": {"application/json": {"example": {"detail": "Internal Server Error"}}}}
@@ -100,14 +100,13 @@ async def patch_issue_type(
 ):
     """Partially update an issue type identified by `issue_type_id`.
 
-    Provide at least one of `status` or `priority` in the JSON body.
+    Provide at least one of `status` or `priority` in the JSON body. You may send one or both fields.
     """
-    # Require exactly one field to patch (either status xor priority)
+    # Require at least one field to patch (status or priority)
     provided_status = issue_type.status is not None
     provided_priority = issue_type.priority is not None
-    if not (provided_status ^ provided_priority):
-        # XOR: True only when exactly one is provided
-        raise HTTPException(status_code=400, detail="Provide exactly one of status or priority")
+    if not (provided_status or provided_priority):
+        raise HTTPException(status_code=400, detail="Provide at least one of status or priority")
 
     try:
         result = await patch_issue_type_controller(db_pool, issue_type_id, issue_type.status, issue_type.priority)
