@@ -5,6 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class Sprint(BaseModel):
     sprint_id: Optional[int] = Field(None, alias="SPRINT_ID")
     name: Optional[str] = Field(None, alias="NAME")
@@ -15,13 +16,15 @@ class Sprint(BaseModel):
     class Config:
         allow_population_by_field_name = True
 
+
 class SprintResponse(BaseModel):
     data: List[Dict[str, Any]]  # Raw JSON from the SP
-    page: Optional[int]
-    currentLimit: Optional[int]
+    page: int
+    currentLimit: int
+    totalData: int
 
     def get_validated_sprints(self) -> List[Sprint]:
-        validated = []
+        validated: List[Sprint] = []
         for item in self.data:
             try:
                 for field in ["DATE_INIT", "DATE_END"]:
@@ -32,22 +35,27 @@ class SprintResponse(BaseModel):
                 logger.warning("Error validating sprint: %s, data: %s", e, item)
         return validated
 
+
 class SprintCreate(BaseModel):
-    name: str = Field(..., description="Name of the sprint")
-    description: str = Field(..., description="Description of the sprint")
-    date_init: date = Field(..., description="Start date of the sprint")
-    date_end: date = Field(..., description="End date of the sprint")
+    # Make fields optional so route can return 400 on missing fields instead of FastAPI returning 422
+    name: Optional[str] = Field(None, description="Name of the sprint")
+    description: Optional[str] = Field(None, description="Description of the sprint")
+    date_init: Optional[date] = Field(None, description="Start date of the sprint")
+    date_end: Optional[date] = Field(None, description="End date of the sprint")
+
 
 class SprintPatchRequest(BaseModel):
-    sprint_id: int
+    # sprint_id must be provided in the path, not the body
     name: Optional[str] = None
     description: Optional[str] = None
     date_init: Optional[date] = None
     date_end: Optional[date] = None
 
+
 class SprintPutRequest(BaseModel):
-    sprint_id: int
-    name: str
-    description: str
-    date_init: date
-    date_end: date
+    # sprint_id must be provided in the path, not the body
+    # Make fields optional so route can validate and return 400 instead of FastAPI's 422
+    name: Optional[str] = None
+    description: Optional[str] = None
+    date_init: Optional[date] = None
+    date_end: Optional[date] = None

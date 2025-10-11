@@ -7,6 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 async def get_sprint_controller(
     db_pool: Pool,
     sprint_id: Optional[int] = None,
@@ -22,17 +23,22 @@ async def get_sprint_controller(
     if db_pool is None:
         raise HTTPException(status_code=500, detail="DB pool no disponible")
     repo = SprintRepository(db_pool)
-    return await repo.get_sprint(
-        sprint_id,
-        name,
-        description,
-        date_init_start,
-        date_init_end,
-        date_end_start,
-        date_end_end,
-        page,
-        limit,
-    )
+    try:
+        return await repo.get_sprint(
+            sprint_id,
+            name,
+            description,
+            date_init_start,
+            date_init_end,
+            date_end_start,
+            date_end_end,
+            page,
+            limit,
+        )
+    except Exception as e:
+        logger.exception("Error en get_sprint_controller: %s", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 async def post_sprint_controller(db_pool: Pool, sprint_data: dict):
     if db_pool is None:
@@ -44,7 +50,12 @@ async def post_sprint_controller(db_pool: Pool, sprint_data: dict):
         sprint_data.get("date_init"),
         sprint_data.get("date_end"),
     )
-    return await repo.post_sprint(params)
+    try:
+        return await repo.post_sprint(params)
+    except Exception as e:
+        logger.exception("Error en post_sprint_controller: %s", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 async def patch_sprint_controller(
     db_pool: Pool,
@@ -52,7 +63,7 @@ async def patch_sprint_controller(
     name: Optional[str] = None,
     description: Optional[str] = None,
     date_init: Optional[date] = None,
-    date_end: Optional[date] = None
+    date_end: Optional[date] = None,
 ) -> dict:
     if db_pool is None:
         raise HTTPException(status_code=500, detail="DB pool no disponible")
@@ -63,13 +74,14 @@ async def patch_sprint_controller(
         logger.exception("Error en patch_sprint_controller: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
+
 async def put_sprint_controller(
     db_pool: Pool,
     sprint_id: int,
     name: str,
     description: str,
     date_init: date,
-    date_end: date
+    date_end: date,
 ) -> dict:
     if db_pool is None:
         raise HTTPException(status_code=500, detail="DB pool no disponible")
@@ -79,6 +91,7 @@ async def put_sprint_controller(
     except Exception as e:
         logger.exception("Error en put_sprint_controller: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
+
 
 async def delete_sprint_controller(db_pool: Pool, sprint_id: int) -> dict:
     if db_pool is None:

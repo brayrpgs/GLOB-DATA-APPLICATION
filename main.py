@@ -13,7 +13,11 @@ from app.database.conection import init_pool, close_pool
 async def lifespan(app: FastAPI):
     # Code that runs on startup
     await init_pool()
-    yield
+    try:
+        yield
+    finally:
+        # Ensure the DB pool is closed on shutdown
+        await close_pool()
 
 app = FastAPI(title="GLOB-DATA-APPLICATION", lifespan=lifespan)
 

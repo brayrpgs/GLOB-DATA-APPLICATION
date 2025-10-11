@@ -13,13 +13,11 @@ class UserProjectCreate(BaseModel):
     productivity: Decimal
 
 class UserProjectPatch(BaseModel):
-    user_project_id: int
     user_id_fk: Optional[int] = None
     rol_proyect: Optional[int] = None
     productivity: Optional[Decimal] = None
 
 class UserProjectPut(BaseModel):
-    user_project_id: int
     user_id_fk: int
     rol_proyect: int
     productivity: Decimal

@@ -95,23 +95,22 @@ class IssueResponseValidated(BaseModel):
 
 
 class IssueCreate(BaseModel):
-    summary: Optional[str] = None
-    description: Optional[str] = None
-    audit_id: Optional[int] = None
-    resolve_at: Optional[str] = None
-    due_date: Optional[str] = None
-    votes: Optional[int] = None
-    original_estimation: Optional[int] = None
-    custom_start_date: Optional[str] = None
-    story_point_estimate: Optional[int] = None
+    summary: str
+    description: str
+    resolve_at: date
+    due_date: date
+    votes: int
+    original_estimation: int
+    custom_start_date: date
+    story_point_estimate: int
     parent_summary: Optional[int] = None
-    issue_type: Optional[int] = None
-    project_id_fk: Optional[int] = None
-    user_assigned_fk: Optional[int] = None
-    user_creator_issue_fk: Optional[int] = None
-    user_informator_fk: Optional[int] = None
-    sprint_id_fk: Optional[int] = None
-    status_issue: Optional[int] = None
+    issue_type: int
+    project_id: int
+    user_assigned: int
+    user_creator: int
+    user_informator: int
+    sprint_id: int
+    status: int
 
 class IssuePatchRequest(BaseModel):
     issue_id: int
