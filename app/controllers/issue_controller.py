@@ -150,39 +150,42 @@ async def patch_issue_controller(db_pool: Optional[Pool], issue_data: IssuePatch
         logger.exception("Error in patch_issue_controller: %s", e)
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
+
 async def put_issue_controller(db_pool: Pool, issue_data: IssuePutRequest) -> Dict[str, Any]:
-        if db_pool is None:
-            raise HTTPException(status_code=500, detail="DB pool not available")
+    if db_pool is None:
+        raise HTTPException(status_code=500, detail="DB pool not available")
 
-        repo = IssueRepository(db_pool)
+    repo = IssueRepository(db_pool)
 
-        # Tuple of parameters in the same order as the SP (without the OUT)
-        params = (
-            issue_data.issue_id,
-            issue_data.summary,
-            issue_data.description,
-            issue_data.audit_id,
-            issue_data.resolve_at,
-            issue_data.due_date,
-            issue_data.votes,
-            issue_data.original_estimation,
-            issue_data.custom_start_date,
-            issue_data.story_point_estimate,
-            issue_data.parent_summary,
-            issue_data.issue_type,
-            issue_data.project_id,
-            issue_data.user_assigned,
-            issue_data.user_creator,
-            issue_data.user_informator,
-            issue_data.sprint_id,
-            issue_data.status,
-        )
+    # Tuple of parameters in the same order as the SP (without the OUT)
+    params = (
+        issue_data.issue_id,
+        issue_data.summary,
+        issue_data.description,
+        issue_data.audit_id,
+        issue_data.resolve_at,
+        issue_data.due_date,
+        issue_data.votes,
+        issue_data.original_estimation,
+        issue_data.custom_start_date,
+        issue_data.story_point_estimate,
+        issue_data.parent_summary,
+        issue_data.issue_type,
+        issue_data.project_id,
+        issue_data.user_assigned,
+        issue_data.user_creator,
+        issue_data.user_informator,
+        issue_data.sprint_id,
+        issue_data.status,
+    )
 
-        try:
-            return await repo.put_issue(params)
-        except Exception as e:
-            logger.exception("Error in put_issue_controller: %s", e)
-            raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+    try:
+        return await repo.put_issue(params)
+    except Exception as e:
+        logger.exception("Error in put_issue_controller: %s", e)
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+
 async def delete_issue_controller(db_pool: Optional[Pool], issue_id: int) -> Dict[str, Any]:
     if db_pool is None:
         logger.error("DB pool not initialized")
