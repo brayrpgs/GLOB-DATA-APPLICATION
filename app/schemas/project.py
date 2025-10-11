@@ -13,16 +13,17 @@ class ProjectBase(BaseModel):
     progress: Optional[Decimal] = None
 
 class ProjectCreate(BaseModel):
-    name: str
-    description: str
-    user_project_id_fk: int
-    date_init: date
-    date_end: date
-    status: int
-    progress: Decimal
+    # Make fields optional so route returns 400 instead of 422 on missing fields
+    name: Optional[str] = None
+    description: Optional[str] = None
+    user_project_id_fk: Optional[int] = None
+    date_init: Optional[date] = None
+    date_end: Optional[date] = None
+    status: Optional[int] = None
+    progress: Optional[Decimal] = None
 
 class ProjectPatch(BaseModel):
-    project_id: int
+    # project_id must be provided in the path, not the body
     name: Optional[str] = None
     description: Optional[str] = None
     user_project_id_fk: Optional[int] = None
@@ -32,14 +33,15 @@ class ProjectPatch(BaseModel):
     progress: Optional[Decimal] = None
 
 class ProjectPut(BaseModel):
-    project_id: int
-    name: str
-    description: str
-    user_project_id_fk: int
-    date_init: date
-    date_end: date
-    status: int
-    progress: Decimal
+    # project_id must be provided in the path, not the body
+    # Make fields optional so route validates and returns 400 instead of 422
+    name: Optional[str] = None
+    description: Optional[str] = None
+    user_project_id_fk: Optional[int] = None
+    date_init: Optional[date] = None
+    date_end: Optional[date] = None
+    status: Optional[int] = None
+    progress: Optional[Decimal] = None
 
 class ProjectResponse(BaseModel):
     data: List[Dict[str, Any]]
