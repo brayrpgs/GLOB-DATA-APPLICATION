@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from asyncpg import Pool
-from typing import Optional
+from typing import Optional, Dict, Any
 from app.schemas.issue import IssueResponse,IssuePatchRequest,IssuePutRequest
 from app.repository.issue_repository import IssueRepository
 import logging
@@ -9,7 +9,7 @@ from app.helpers.utilities import _validate_pagination_parameters
 logger = logging.getLogger(__name__)
 
 
-async def post_issue_controller(db_pool: Optional[Pool], issue_data: dict) -> dict:
+async def post_issue_controller(db_pool: Optional[Pool], issue_data: Dict[str, Any]) -> dict:
     if db_pool is None:
         raise HTTPException(status_code=500, detail="DB pool not initialized")
 
@@ -116,7 +116,7 @@ async def get_issues_controller(
             status_code=500, detail=f"Internal server error: {str(e)}"
         )
 
-async def patch_issue_controller(db_pool: Optional[Pool], issue_data: IssuePatchRequest) -> dict:
+async def patch_issue_controller(db_pool: Optional[Pool], issue_data: IssuePatchRequest) -> Dict[str, Any]:
     if db_pool is None:
         raise HTTPException(status_code=500, detail="DB pool not available")
 
@@ -150,40 +150,43 @@ async def patch_issue_controller(db_pool: Optional[Pool], issue_data: IssuePatch
         logger.exception("Error in patch_issue_controller: %s", e)
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
-async def put_issue_controller(db_pool: Pool, issue_data: IssuePutRequest) -> dict:
-        if db_pool is None:
-            raise HTTPException(status_code=500, detail="DB pool not available")
 
-        repo = IssueRepository(db_pool)
+async def put_issue_controller(db_pool: Pool, issue_data: IssuePutRequest) -> Dict[str, Any]:
+    if db_pool is None:
+        raise HTTPException(status_code=500, detail="DB pool not available")
 
-        # Tuple of parameters in the same order as the SP (without the OUT)
-        params = (
-            issue_data.issue_id,
-            issue_data.summary,
-            issue_data.description,
-            issue_data.audit_id,
-            issue_data.resolve_at,
-            issue_data.due_date,
-            issue_data.votes,
-            issue_data.original_estimation,
-            issue_data.custom_start_date,
-            issue_data.story_point_estimate,
-            issue_data.parent_summary,
-            issue_data.issue_type,
-            issue_data.project_id,
-            issue_data.user_assigned,
-            issue_data.user_creator,
-            issue_data.user_informator,
-            issue_data.sprint_id,
-            issue_data.status,
-        )
+    repo = IssueRepository(db_pool)
 
-        try:
-            return await repo.put_issue(params)
-        except Exception as e:
-            logger.exception("Error in put_issue_controller: %s", e)
-            raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
-async def delete_issue_controller(db_pool: Optional[Pool], issue_id: int) -> dict:
+    # Tuple of parameters in the same order as the SP (without the OUT)
+    params = (
+        issue_data.issue_id,
+        issue_data.summary,
+        issue_data.description,
+        issue_data.audit_id,
+        issue_data.resolve_at,
+        issue_data.due_date,
+        issue_data.votes,
+        issue_data.original_estimation,
+        issue_data.custom_start_date,
+        issue_data.story_point_estimate,
+        issue_data.parent_summary,
+        issue_data.issue_type,
+        issue_data.project_id,
+        issue_data.user_assigned,
+        issue_data.user_creator,
+        issue_data.user_informator,
+        issue_data.sprint_id,
+        issue_data.status,
+    )
+
+    try:
+        return await repo.put_issue(params)
+    except Exception as e:
+        logger.exception("Error in put_issue_controller: %s", e)
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+
+async def delete_issue_controller(db_pool: Optional[Pool], issue_id: int) -> Dict[str, Any]:
     if db_pool is None:
         logger.error("DB pool not initialized")
         raise HTTPException(status_code=500, detail="DB pool not initialized")
