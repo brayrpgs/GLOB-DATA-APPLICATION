@@ -84,9 +84,7 @@ async def patch_issue(issue_update: IssuePatchRequest, issue_id: int = Path(...,
     """
     Partially updates an issue using PATCH_ISSUE SP.
     """
-    # Set the issue_id from the path into the request object
-    issue_update.issue_id = issue_id
-    return await patch_issue_controller(db_pool, issue_update)
+    return await patch_issue_controller(db_pool, issue_id, issue_update)
 
 @router.put("/{issue_id}", responses={
     200: {"description": "Issue replaced successfully"},
@@ -98,9 +96,7 @@ async def put_issue(issue_replace: IssuePutRequest, issue_id: int = Path(..., de
     """
     Completely replaces an issue using PUT_ISSUE SP.
     """
-    # Set the issue_id from the path into the request object
-    issue_replace.issue_id = issue_id
-    return await put_issue_controller(db_pool, issue_replace)
+    return await put_issue_controller(db_pool, issue_id, issue_replace)
 
 @router.delete("/{issue_id}", responses={
     200: {"description": "Issue deleted successfully"},

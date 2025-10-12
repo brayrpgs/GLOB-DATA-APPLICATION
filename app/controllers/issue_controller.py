@@ -116,32 +116,47 @@ async def get_issues_controller(
             status_code=500, detail=f"Internal server error: {str(e)}"
         )
 
-async def patch_issue_controller(db_pool: Optional[Pool], issue_data: IssuePatchRequest) -> Dict[str, Any]:
+async def patch_issue_controller(db_pool: Optional[Pool], issue_id: int, issue_data: IssuePatchRequest) -> Dict[str, Any]:
     if db_pool is None:
         raise HTTPException(status_code=500, detail="DB pool not available")
 
     repo = IssueRepository(db_pool)
 
+    # Get the current state of the issue
+    existing_issues = await repo.get_issues(issue_id=issue_id)
+    if not existing_issues:
+        raise HTTPException(status_code=404, detail="Issue not found")
+    
+    # There should be only one issue with that ID
+    existing_issue = existing_issues[0]
+
+    # Get the update data, excluding unset fields which were not in the request
+    update_data = issue_data.dict(exclude_unset=True)
+
+    # Merge existing data with update data
+    # The value from update_data takes precedence
+    merged_data = {**existing_issue, **update_data}
+
     # Tuple of parameters in the same order as the SP (without the OUT)
     params = (
-        issue_data.issue_id,
-        issue_data.summary,
-        issue_data.description,
-        issue_data.audit_id,
-        issue_data.resolve_at,
-        issue_data.due_date,
-        issue_data.votes,
-        issue_data.original_estimation,
-        issue_data.custom_start_date,
-        issue_data.story_point_estimate,
-        issue_data.parent_summary,
-        issue_data.issue_type,
-        issue_data.project_id,
-        issue_data.user_assigned,
-        issue_data.user_creator,
-        issue_data.user_informator,
-        issue_data.sprint_id,
-        issue_data.status,
+        issue_id,  # Use the ID from the path
+        merged_data.get("summary"),
+        merged_data.get("description"),
+        merged_data.get("audit_id"),
+        merged_data.get("resolve_at"),
+        merged_data.get("due_date"),
+        merged_data.get("votes"),
+        merged_data.get("original_estimation"),
+        merged_data.get("custom_start_date"),
+        merged_data.get("story_point_estimate"),
+        merged_data.get("parent_summary"),
+        merged_data.get("issue_type"),
+        merged_data.get("project_id"),
+        merged_data.get("user_assigned"),
+        merged_data.get("user_creator"),
+        merged_data.get("user_informator"),
+        merged_data.get("sprint_id"),
+        merged_data.get("status"),
     )
 
     try:
@@ -151,7 +166,7 @@ async def patch_issue_controller(db_pool: Optional[Pool], issue_data: IssuePatch
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 
-async def put_issue_controller(db_pool: Pool, issue_data: IssuePutRequest) -> Dict[str, Any]:
+async def put_issue_controller(db_pool: Pool, issue_id: int, issue_data: IssuePutRequest) -> Dict[str, Any]:
     if db_pool is None:
         raise HTTPException(status_code=500, detail="DB pool not available")
 
@@ -159,7 +174,7 @@ async def put_issue_controller(db_pool: Pool, issue_data: IssuePutRequest) -> Di
 
     # Tuple of parameters in the same order as the SP (without the OUT)
     params = (
-        issue_data.issue_id,
+        issue_id,  # Use the ID from the path
         issue_data.summary,
         issue_data.description,
         issue_data.audit_id,

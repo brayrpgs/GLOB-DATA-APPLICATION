@@ -113,7 +113,6 @@ class IssueCreate(BaseModel):
     status: int
 
 class IssuePatchRequest(BaseModel):
-    issue_id: int
     summary: Optional[str] = None
     description: Optional[str] = None
     audit_id: Optional[int] = None
@@ -134,7 +133,6 @@ class IssuePatchRequest(BaseModel):
     
     
 class IssuePutRequest(BaseModel):
-    issue_id: int
     summary: str
     description: str
     audit_id: int
@@ -144,11 +142,11 @@ class IssuePutRequest(BaseModel):
     original_estimation: int
     custom_start_date: date
     story_point_estimate: int
-    parent_summary: int
+    parent_summary: Optional[int] = None
     issue_type: int
     project_id: int
-    user_assigned: int
-    user_creator: int
-    user_informator: int
+    user_assigned: Optional[int] = None
+    user_creator: Optional[int] = None
+    user_informator: Optional[int] = None
     sprint_id: int
     status: int
