@@ -30,8 +30,8 @@ router = APIRouter(prefix="/user-projects", tags=["user-projects"])
     500: {"description": "Internal Server Error", "content": {"application/json": {"example": {"detail": "Internal Server Error"}}}},
 })
 async def create_user_project(user_project: UserProjectCreate, db_pool: Pool = Depends(get_pool)):
-    if user_project.user_id_fk is None or user_project.rol_proyect is None or user_project.productivity is None:
-        raise HTTPException(status_code=400, detail="user_id_fk, rol_proyect and productivity are required")
+    if user_project.rol_proyect is None or user_project.productivity is None:
+        raise HTTPException(status_code=400, detail="rol_proyect and productivity are required")
 
     try:
         result = await post_user_project_controller(db_pool, user_project.user_id_fk, user_project.rol_proyect, user_project.productivity)
@@ -128,8 +128,8 @@ async def put_user_project(
     user_project_id: int = Path(..., description="ID of the user_project to update"),
     db_pool: Pool = Depends(get_pool),
 ):
-    if user_project.user_id_fk is None or user_project.rol_proyect is None or user_project.productivity is None:
-        raise HTTPException(status_code=400, detail="user_id_fk, rol_proyect and productivity are required")
+    if user_project.rol_proyect is None or user_project.productivity is None:
+        raise HTTPException(status_code=400, detail="rol_proyect and productivity are required")
 
     try:
         result = await put_user_project_controller(db_pool, user_project_id, user_project.user_id_fk, user_project.rol_proyect, user_project.productivity)

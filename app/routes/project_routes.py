@@ -36,13 +36,12 @@ async def create_project(project: ProjectCreate, db_pool: Pool = Depends(get_poo
     if (
         project.name is None
         or project.description is None
-        or project.user_project_id_fk is None
         or project.date_init is None
         or project.date_end is None
         or project.status is None
         or project.progress is None
     ):
-        raise HTTPException(status_code=400, detail="name, description, user_project_id_fk, date_init, date_end, status and progress are required")
+        raise HTTPException(status_code=400, detail="name, description, date_init, date_end, status and progress are required")
 
     try:
         result = await post_project_controller(
@@ -195,13 +194,12 @@ async def put_project(
     if (
         project.name is None
         or project.description is None
-        or project.user_project_id_fk is None
         or project.date_init is None
         or project.date_end is None
         or project.status is None
         or project.progress is None
     ):
-        raise HTTPException(status_code=400, detail="name, description, user_project_id_fk, date_init, date_end, status and progress are required")
+        raise HTTPException(status_code=400, detail="name, description, date_init, date_end, status and progress are required")
 
     try:
         result = await put_project_controller(

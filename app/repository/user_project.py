@@ -12,7 +12,7 @@ class UserProjectRepository:
 
     async def post_user_project(
         self,
-        user_id_fk: int,
+        user_id_fk: Optional[int],
         rol_proyect: int,
         productivity: Decimal
     ) -> Dict[str, Any]:
@@ -75,7 +75,7 @@ class UserProjectRepository:
     async def put_user_project(
         self,
         user_project_id: int,
-        user_id_fk: int,
+        user_id_fk: Optional[int],
         rol_proyect: int,
         productivity: Decimal
     ) -> Dict[str, Any]:

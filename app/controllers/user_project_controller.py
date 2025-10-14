@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 async def post_user_project_controller(
     db_pool: Pool,
-    user_id_fk: int,
+    user_id_fk: Optional[int],
     rol_proyect: int,
     productivity: Decimal
 ) -> dict:
@@ -60,7 +60,7 @@ async def patch_user_project_controller(
 async def put_user_project_controller(
     db_pool: Pool,
     user_project_id: int,
-    user_id_fk: int,
+    user_id_fk: Optional[int],
     rol_proyect: int,
     productivity: Decimal
 ) -> dict:

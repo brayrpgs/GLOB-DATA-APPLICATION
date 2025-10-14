@@ -10,13 +10,13 @@ logger = logging.getLogger(__name__)
 
 async def post_project_controller(
     db_pool: Pool,
-    name: str,
-    description: str,
-    user_project_id_fk: int,
-    date_init: date,
-    date_end: date,
-    status: int,
-    progress: Decimal
+    name: Optional[str] = None,
+    description: Optional[str] = None,
+    user_project_id_fk: Optional[int] = None,
+    date_init: Optional[date] = None,
+    date_end: Optional[date] = None,
+    status: Optional[int] = None,
+    progress: Optional[Decimal] = None
 ) -> dict:
     if db_pool is None:
         raise HTTPException(status_code=500, detail="DB pool no disponible")
@@ -61,13 +61,13 @@ async def patch_project_controller(
 async def put_project_controller(
     db_pool: Pool,
     project_id: int,
-    name: str,
-    description: str,
-    user_project_id_fk: int,
-    date_init: date,
-    date_end: date,
-    status: int,
-    progress: Decimal
+    name: Optional[str] = None,
+    description: Optional[str] = None,
+    user_project_id_fk: Optional[int] = None,
+    date_init: Optional[date] = None,
+    date_end: Optional[date] = None,
+    status: Optional[int] = None,
+    progress: Optional[Decimal] = None
 ) -> dict:
     if db_pool is None:
         raise HTTPException(status_code=500, detail="DB pool no disponible")

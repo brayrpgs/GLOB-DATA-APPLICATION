@@ -15,11 +15,11 @@ class ProjectRepository:
         self,
         name: str,
         description: str,
-        user_project_id_fk: int,
         date_init: date,
         date_end: date,
         status: int,
-        progress: Decimal
+        progress: Decimal,
+        user_project_id_fk: Optional[int] = None
     ) -> Dict[str, Any]:
         query = 'CALL PUBLIC."POST_PROJECT"($1, $2, $3, $4, $5, $6, $7, NULL)'
         try:
@@ -92,13 +92,13 @@ class ProjectRepository:
     async def put_project(
         self,
         project_id: int,
-        name: str,
-        description: str,
-        user_project_id_fk: int,
-        date_init: date,
-        date_end: date,
-        status: int,
-        progress: Decimal
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        user_project_id_fk: Optional[int] = None,
+        date_init: Optional[date] = None,
+        date_end: Optional[date] = None,
+        status: Optional[int] = None,
+        progress: Optional[Decimal] = None
     ) -> Dict[str, Any]:
         query = 'CALL PUBLIC."PUT_PROJECT"($1, $2, $3, $4, $5, $6, $7, $8, NULL)'
         try:
