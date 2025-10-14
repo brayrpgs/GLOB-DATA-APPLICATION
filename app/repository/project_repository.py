@@ -13,13 +13,13 @@ class ProjectRepository:
 
     async def post_project(
         self,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-        user_project_id_fk: Optional[int] = None,
-        date_init: Optional[date] = None,
-        date_end: Optional[date] = None,
-        status: Optional[int] = None,
-        progress: Optional[Decimal] = None
+        name: str,
+        description: str,
+        date_init: date,
+        date_end: date,
+        status: int,
+        progress: Decimal,
+        user_project_id_fk: Optional[int] = None
     ) -> Dict[str, Any]:
         query = 'CALL PUBLIC."POST_PROJECT"($1, $2, $3, $4, $5, $6, $7, NULL)'
         try:
