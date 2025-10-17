@@ -24,7 +24,7 @@ class ProjectRepository:
         query = 'CALL PUBLIC."POST_PROJECT"($1, $2, $3, $4, $5, $6, $7, NULL)'
         try:
             async with self.db_pool.acquire() as conn:
-                row = await conn.fetchrow(query, name, description, user_project_id_fk, date_init, date_end, status, progress)
+                row = await conn.fetchrow(query, name, description, date_init, date_end, status, progress, user_project_id_fk)
                 if not row:
                     return {}
                 result_data = row.get("data") if "data" in row else row[0]
