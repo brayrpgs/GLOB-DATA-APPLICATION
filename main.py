@@ -6,6 +6,7 @@ from app.routes.sprint_routes import router as sprint
 from app.routes.project_routes import router as proyect
 from app.routes.user_project_routes import router as proyect_routes
 
+from app.middlewares.RequestValidationMiddleware import request_validation_middleware
 
 from app.database.conection import init_pool, close_pool
 
@@ -20,6 +21,9 @@ async def lifespan(app: FastAPI):
         await close_pool()
 
 app = FastAPI(title="GLOB-DATA-APPLICATION", lifespan=lifespan)
+
+# Add middleware
+app.middleware("http")(request_validation_middleware)
 
 # Mount routers
 app.include_router(issue_router)
