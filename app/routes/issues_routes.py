@@ -119,7 +119,10 @@ async def patch_issue(
         raise HTTPException(status_code=400, detail="Provide at least one field to update")
 
     try:
-        result = await patch_issue_controller(db_pool, issue_id, issue)
+        # Send only the fields the client provided so we can distinguish
+        # between "not provided" (leave unchanged) and provided null
+        # (explicitly set to NULL in DB).
+        result = await patch_issue_controller(db_pool, issue_id, update_data)
         
         if result is None:
             return JSONResponse(status_code=404, content={"detail": "Issue not found"})
