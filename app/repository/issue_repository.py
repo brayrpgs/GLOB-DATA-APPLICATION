@@ -106,77 +106,29 @@ class IssueRepository:
             raise
 
     async def patch_issue(self, issue_id: int, issue: IssuePatchRequest) -> Dict[str, Any]:
-        # Accept a dict with only the fields provided by the client (exclude_unset)
-        # so we can distinguish omitted fields (leave unchanged) from explicit nulls
         query = 'CALL PUBLIC."PATCH_ISSUE"(NULL, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)'
         try:
-            # `issue` may be either a dict of provided fields or a model; normalize to dict
-            provided = issue if isinstance(issue, dict) else (issue.dict(exclude_unset=True) if hasattr(issue, 'dict') else {})
-
-            # Fetch current values for the issue to preserve omitted fields
-            current_rows = await self.get_issues(issue_id=issue_id, page=1, limit=1)
-            if not current_rows:
-                return {}
-            current = current_rows[0]
-
-            # Map model field names to DB response keys
-            mapping = {
-                "summary": "SUMMARY",
-                "description": "DESCRIPTION",
-                "audit_id": "AUDIT_ID_FK",
-                "resolve_at": "RESOLVE_AT",
-                "due_date": "DUE_DATE",
-                "votes": "VOTES",
-                "original_estimation": "ORIGINAL_ESTIMATION",
-                "custom_start_date": "CUSTOM_START_DATE",
-                "story_point_estimate": "STORY_POINT_ESTIMATE",
-                "parent_summary": "PARENT_SUMMARY_FK",
-                "issue_type": "ISSUE_TYPE",
-                "project_id": "PROJECT_ID_FK",
-                "user_assigned": "USER_ASSIGNED_FK",
-                "user_creator": "USER_CREATOR_ISSUE_FK",
-                "user_informator": "USER_INFORMATOR_ISSUE_FK",
-                "sprint_id": "SPRINT_ID_FK",
-                "status": "STATUS_ISSUE"
-            }
-
-            # Order of fields expected by the stored procedure
-            fields_in_order = [
-                "summary",
-                "description",
-                "audit_id",
-                "resolve_at",
-                "due_date",
-                "votes",
-                "original_estimation",
-                "custom_start_date",
-                "story_point_estimate",
-                "parent_summary",
-                "issue_type",
-                "project_id",
-                "user_assigned",
-                "user_creator",
-                "user_informator",
-                "sprint_id",
-                "status"
-            ]
-
-            params = []
-            for f in fields_in_order:
-                if f in provided:
-                    # explicit provided value (may be None -> set NULL)
-                    params.append(provided.get(f))
-                else:
-                    # not provided -> keep current DB value
-                    params.append(current.get(mapping[f]))
-
             async with self.db_pool.acquire() as conn:
-                # Print the parameters we will send to the stored procedure for debugging (container-friendly)
-                print(f"PATCH_ISSUE called for ISSUE_ID={issue_id} with params={params}")
                 row = await conn.fetchrow(
                     query,
                     issue_id,
-                    *params
+                    issue.summary,
+                    issue.description,
+                    issue.audit_id,
+                    issue.resolve_at,
+                    issue.due_date,
+                    issue.votes,
+                    issue.original_estimation,
+                    issue.custom_start_date,
+                    issue.story_point_estimate,
+                    issue.parent_summary,
+                    issue.issue_type,
+                    issue.project_id,
+                    issue.user_assigned,
+                    issue.user_creator,
+                    issue.user_informator,
+                    issue.sprint_id,
+                    issue.status
                 )
                 if not row:
                     return {}

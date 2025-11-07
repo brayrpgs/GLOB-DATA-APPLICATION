@@ -2,7 +2,7 @@ from typing import Optional, Dict, Any
 from fastapi import HTTPException
 from asyncpg import Pool
 from app.repository.issue_repository import IssueRepository
-from app.schemas.issue import IssueCreate, IssuePutRequest
+from app.schemas.issue import IssueCreate, IssuePatchRequest, IssuePutRequest
 import logging
 
 logger = logging.getLogger(__name__)
@@ -69,14 +69,14 @@ async def get_issue_controller(
 async def patch_issue_controller(
     db_pool: Pool,
     issue_id: int,
-    issue_update: Dict[str, Any]
+    issue: IssuePatchRequest
 ) -> Dict[str, Any]:
     if db_pool is None:
         raise HTTPException(status_code=500, detail="DB pool not available")
     
     repo = IssueRepository(db_pool)
     try:
-        return await repo.patch_issue(issue_id, issue_update)
+        return await repo.patch_issue(issue_id, issue)
     except Exception as e:
         logger.exception("Error in patch_issue_controller: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
