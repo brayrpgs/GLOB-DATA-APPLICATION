@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from contextlib import asynccontextmanager
+from app.routes.membership_routes import router as membership_routes
 from app.routes.issues_routes import router as issue_router
 from app.routes.issue_type import router as issue_type
 from app.routes.sprint_routes import router as sprint
 from app.routes.project_routes import router as proyect
 from app.routes.user_project_routes import router as proyect_routes
+
 
 from app.middlewares.RequestValidationMiddleware import request_validation_middleware
 
@@ -60,3 +62,4 @@ app.include_router(issue_type)
 app.include_router(sprint)
 app.include_router(proyect)
 app.include_router(proyect_routes)
+app.include_router(membership_routes)
